@@ -8,7 +8,6 @@ import (
 	"vec-calc-server/model"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 //go:embed index.html
@@ -16,15 +15,10 @@ var fs embed.FS
 
 func main() {
 	config := lib.LoadConfig[config.Config]()
-	db := lib.NewDB(&config.DatabaseConfig, func(db *gorm.DB) error {
-		return db.AutoMigrate(&model.User{})
-	})
 	router := gin.Default()
-	calcRouter := router.Group("/api/calc").Use(lib.JWTMiddleware(nil))
-	loginRouter := router.Group("/api/user")
+	calcRouter := router.Group("/api/calc")
 	calcRouter.POST("/dot", HandleCalcDot)
 	calcRouter.POST("/mul", HandleCalcMul)
-	lib.AddLoginAPI(loginRouter, "", db)
 	lib.AddStaticFS(router, fs)
 
 	panic(router.Run(config.ServerConfig.Port))

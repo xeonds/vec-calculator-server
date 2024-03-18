@@ -81,21 +81,38 @@ func BenchmarkAPI(b *testing.B) {
 
 	// Perform the benchmark
 	b.ResetTimer()
+	maxParallelRequests := 1000000000 // Set the maximum parallel request count
+	semaphore := make(chan struct{}, maxParallelRequests)
+
 	for i := 0; i < b.N; i++ {
 		for j, payload := range payloads {
 			b.Run(fmt.Sprintf("case-%d", j), func(b *testing.B) {
-				req, _ := http.NewRequest("POST", "/api/calc/mul", bytes.NewBuffer(payload))
-				req.Header.Set("Content-Type", "application/json")
+				semaphore <- struct{}{} // Acquire semaphore
+				go func() {
+					defer func() {
+						<-semaphore // Release semaphore
+					}()
 
-				rr := httptest.NewRecorder()
-				router.ServeHTTP(rr, req)
+					req, _ := http.NewRequest("POST", "/api/calc/mul", bytes.NewBuffer(payload))
+					req.Header.Set("Content-Type", "application/json")
+
+					rr := httptest.NewRecorder()
+					router.ServeHTTP(rr, req)
+				}()
 			})
 			b.Run(fmt.Sprintf("case-%d", j), func(b *testing.B) {
-				req, _ := http.NewRequest("POST", "/api/calc/dot", bytes.NewBuffer(payload))
-				req.Header.Set("Content-Type", "application/json")
+				semaphore <- struct{}{} // Acquire semaphore
+				go func() {
+					defer func() {
+						<-semaphore // Release semaphore
+					}()
 
-				rr := httptest.NewRecorder()
-				router.ServeHTTP(rr, req)
+					req, _ := http.NewRequest("POST", "/api/calc/dot", bytes.NewBuffer(payload))
+					req.Header.Set("Content-Type", "application/json")
+
+					rr := httptest.NewRecorder()
+					router.ServeHTTP(rr, req)
+				}()
 			})
 		}
 	}
