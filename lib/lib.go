@@ -41,17 +41,6 @@ func LoadConfig[Config any]() *Config {
 	return config
 }
 
-// 为Gin router 添加CRUD
-func APIBuilder(router gin.IRouter, handlers ...func(*gin.RouterGroup) *gin.RouterGroup) func(gin.IRouter, string) *gin.RouterGroup {
-	return func(router gin.IRouter, path string) *gin.RouterGroup {
-		group := router.Group(path)
-		for _, handler := range handlers {
-			group = handler(group)
-		}
-		return group
-	}
-}
-
 func AddStaticFS(router *gin.Engine, fs embed.FS) {
 	router.NoRoute(gin.WrapH(http.FileServer(http.FS(fs))))
 }
