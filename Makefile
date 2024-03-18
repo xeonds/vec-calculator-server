@@ -9,7 +9,10 @@ GOBUILD=go mod tidy && go build -ldflags '-s -w -X "main.version=$(VERSION)" -X 
 all: linux-amd64 windows-amd64
 
 init:
-	(go mod tidy)
+	go mod tidy
+
+run:
+	cd $(BINDIR) && ./$(NAME)-linux-amd64-$(VERSION)
 
 clean:
 	rm -rf $(BINDIR)/*
@@ -17,9 +20,6 @@ clean:
 bench:
 	cd $(BINDIR) && ./$(NAME)-linux-amd64-$(VERSION) & sleep 1 && \
 	wrk -t 20 -c 10000 -d 180s -s bench.lua --latency "http://localhost:8080/api/calc/mul"
-
-dev: linux-amd64
-	cd $(BINDIR) && ./$(NAME)-linux-amd64-$(VERSION)
 
 linux-amd64: 
 	GOOS=linux GOARCH=amd64 $(GOBUILD) -o ./$(BINDIR)/$(NAME)-$@-$(VERSION)
