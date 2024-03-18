@@ -1,80 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Vector Calculator</title>
+    <title>向量计算服务</title>
 </head>
 <body>
-    <h1>Vector Calculator</h1>
+    <h1>向量计算器</h1>
 
-    <div id="loginRegisterContainer">
-        <form id="loginRegisterForm">
-            <h2>Login/Register</h2>
-            <label for="loginUsername">Username:</label>
-            <input type="text" id="loginUsername" name="loginUsername" placeholder="Enter username" required><br>
-            
-            <label for="loginPassword">Password:</label>
-            <input type="password" id="loginPassword" name="loginPassword" placeholder="Enter password" required><br>
-            
-            <input type="submit" id="loginButton" value="Login">
-            <input type="submit" id="registerButton" value="Register">
-        </form>
-    </div>
-    
-    <div id="calculatorContainer" style="display: none;">
+    <div id="calculatorContainer">
         <form id="vectorForm">
-            <h2>Vector Calculation</h2>
-            <label for="vector1">Vector 1:</label>
+            <h2>向量计算</h2>
+            <label for="vector1">向量1：</label>
             <input type="text" id="vector1" name="vector1" placeholder="Enter vector 1" required><br>
             
-            <label for="vector2">Vector 2:</label>
+            <label for="vector2">向量2：</label>
             <input type="text" id="vector2" name="vector2" placeholder="Enter vector 2" required><br>
             
-            <label for="operation">Operation:</label>
+            <label for="operation">操作</label>
             <select id="operation" name="operation">
-                <option value="dot">Dot</option>
-                <option value="mul">Mul</option>
+                <option value="dot">点乘</option>
+                <option value="mul">叉乘</option>
             </select><br>
             
             <input type="submit" value="Calculate">
         </form>
-        
-        <button id="logoutButton">Logout</button>
     </div>
 
     <script>
-        var token = localStorage.getItem("token");
-        
-        if (token) {
-            document.getElementById("loginRegisterContainer").style.display = "none";
-            document.getElementById("calculatorContainer").style.display = "block";
-        } else {
-            document.getElementById("loginRegisterContainer").style.display = "block";
-            document.getElementById("calculatorContainer").style.display = "none";
-        }
-        document.getElementById("loginRegisterForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            var loginData = {
-                username: document.getElementById("loginUsername").value,
-                password: document.getElementById("loginPassword").value
-            };
-            var action = event.submitter.id === "loginButton" ? "/api/user/login" : "/api/user/register";
-            fetch(action, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(loginData)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.error) alert(result.error);
-                if (result.token) {
-                    localStorage.setItem("token", result.token);
-                    document.getElementById("loginRegisterContainer").style.display = "none";
-                    document.getElementById("calculatorContainer").style.display = "block";
-                }
-            })
-            .catch(error => { console.error(error); });
-        });
-        
         document.getElementById("vectorForm").addEventListener("submit", function(event) {
             event.preventDefault();
             var vector1 = document.getElementById("vector1").value.split(",");
@@ -83,17 +34,12 @@
             var data = [ vector1.map(Number), vector2.map(Number) ];
             fetch("/api/calc/" + operation, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "Authorization": token },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             })
             .then(response => response.json())
             .then(result => { alert(result); })
             .catch(error => { alert(error); });
-        });
-        document.getElementById("logoutButton").addEventListener("click", function() {
-            localStorage.removeItem("token");
-            document.getElementById("loginRegisterContainer").style.display = "block";
-            document.getElementById("calculatorContainer").style.display = "none";
         });
     </script>
 </body>
