@@ -15,6 +15,7 @@ import (
 // 通用配置
 type ServerConfig struct {
 	Port string `json:"port"`
+	Mode string `json:"mode"`
 }
 
 // 配置管理

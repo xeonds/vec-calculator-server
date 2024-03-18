@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"io"
 	"net/http"
 	"vec-calc-server/config"
 	"vec-calc-server/lib"
@@ -15,7 +16,11 @@ var fs embed.FS
 
 func main() {
 	config := lib.LoadConfig[config.Config]()
-	router := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
+	gin.DefaultWriter = io.Discard
+	router := gin.New()
+	router.Use(gin.Recovery())
 	calcRouter := router.Group("/api/calc")
 	calcRouter.POST("/dot", HandleCalcDot)
 	calcRouter.POST("/mul", HandleCalcMul)
